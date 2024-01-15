@@ -1,25 +1,33 @@
-const mongoClient=require('mongodb').MongoClient
-const state={
-    db:null
-}
 
-module.exports.connect=function(done){
-     const url = 'mongodb://localhost:27017' 
-    const dbName = 'ShoppingCart'
-    console.log("connecting")
+const mongoose = require('mongoose');
 
-    mongoClient.connect(url,(err,data)=>{
-        console.log("dbconnect")
-        if (err) 
-        { console.log(err)
-            return done(err)}
-        state.db=data.db(dbName)
-        console.log("connection establish")
-        done()
-    })
-   
-}
+const state = {
+    db: null,
+};
 
-module.exports.get=function(){
-    return state.db
-}
+module.exports.connect = function (done) {
+    const url = 'mongodb://localhost:27017';
+    const dbName = 'Shopping';
+
+    mongoose.connect(`${url}/${dbName}`, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    });
+
+    const db = mongoose.connection;
+
+    db.on('error', (err) => {
+        console.error('MongoDB connection error:', err);
+        done(err);
+    });
+
+    db.once('open', () => {
+        state.db = db;
+        console.log('MongoDB connection established');
+        done();
+    });
+};
+
+module.exports.get = function () {
+    return state.db;
+};
